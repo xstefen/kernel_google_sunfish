@@ -496,6 +496,9 @@ static void lpi_gpio_dbg_show(struct seq_file *s, struct gpio_chip *chip)
 	for (i = 0; i < chip->ngpio; i++, gpio++) {
 		if (lpi_gpio_is_ignored(chip, i))
 			continue;
+#ifdef CONFIG_MACH_XIAOMI_SDMMAGPIE
+		if (i < 8 || (i > 11 && i < 18)) continue;
+#endif
 		lpi_gpio_dbg_show_one(s, NULL, chip, i, gpio);
 		seq_puts(s, "\n");
 	}
@@ -810,6 +813,17 @@ static struct platform_driver lpi_pinctrl_driver = {
 };
 
 module_platform_driver(lpi_pinctrl_driver);
+static int __init lpi_init(void)
+{
+	return platform_driver_register(&lpi_pinctrl_driver);
+}
+late_initcall(lpi_init);
+
+static void __exit lpi_exit(void)
+{
+	platform_driver_unregister(&lpi_pinctrl_driver);
+}
+module_exit(lpi_exit);
 
 MODULE_DESCRIPTION("QTI LPI GPIO pin control driver");
 MODULE_LICENSE("GPL v2");
